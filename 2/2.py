@@ -17,8 +17,6 @@ def max_for_color(game_data: str, color: str) -> int:
     int_results = []
     for result in results:
         int_results.append(int(result))
-
-    print (results)
     return max(int_results)
 
 
@@ -32,18 +30,23 @@ def is_valid_game(game_data: str) -> bool:
     return False
 
 
+def get_game_power(game_data: str) -> int:
+    max_red = max_for_color(game_data, 'red')
+    max_blue = max_for_color(game_data, 'blue')
+    max_green = max_for_color(game_data, 'green')
+    return max_blue*max_green*max_red
+
+
 def extract_game_id_game_data(line: str) -> tuple[str,str]:
     match = re.search(re_game_id_game_data, line)
     return match.group(1), match.group(2)
 
 
-game_id_total = 0
+game_power_total = 0
 for line in open('2/input.txt'):
     game_id, game_data = extract_game_id_game_data(line)
-    print(f'Analyzing game {game_id}')
-    if is_valid_game(game_data=game_data):
-        print(f'Game {game_id} is valid')
-        game_id_total += int(game_id)
-    else:
-        print(f'Game {game_id} is NOT valid')
-print(f'Total sum of game ids: {game_id_total}')
+    game_power = get_game_power(game_data=game_data)
+    print(f'Game {game_id} has {game_power} power')
+    game_power_total += game_power
+
+print(game_power_total)

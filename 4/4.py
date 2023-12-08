@@ -1,19 +1,19 @@
 import re
 
-re_card_id = r"Card (\d+)"
+re_card_id = r"Card\s*(\d+).*"
 re_number = r"(\d+)"
 
 
 def get_card_id_and_data(line: [str]):
     split_line = line.split(':')
-    card_id = re.match(re_card_id, split_line[0])
+    card_id = re.search(re_card_id, split_line[0])[1]
     card_data = split_line[1]
 
-    return card_id, card_data
+    return int(card_id), card_data
 
 
 def data_to_numbers(data: str) -> [int]:
-    return re.finditer(re_number,data)
+    return re.finditer(re_number, data)
 
 
 def number_of_matches(data: str):
@@ -33,9 +33,21 @@ def point_value(num_matches: int):
         return pow(2, num_matches-1)
 
 
-total_value = 0
-for play in open('4/input.txt'):
-    card_id, card_data = get_card_id_and_data(play)
-    total_value += point_value(number_of_matches(card_data))
+card_stack = [line for line in open('4/input.txt')]
+card_count = {1: 1}
 
-print(total_value)
+for card in card_stack:
+    card_id, card_data = get_card_id_and_data(card)
+    num_matches = number_of_matches(card_data)
+    if num_matches == 0:
+        card_count.setdefault(card_id, 1)
+    for new_card_id in range(card_id+1, card_id+num_matches+1):
+        card_count.setdefault(new_card_id, 1)
+        card_count.setdefault(card_id, 1)
+        card_count[new_card_id] += card_count[card_id]
+    
+
+card_total = 0
+for card_id, card_copies in card_count.items():
+    card_total += card_copies
+print(card_total)
